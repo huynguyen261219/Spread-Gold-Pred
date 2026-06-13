@@ -6,41 +6,10 @@ import plotly.graph_objects as go
 # PAGE CONFIG
 # =====================================================
 
-# st.set_page_config(
-#     page_title="Gold Spread Forecasting System",
-#     page_icon="📈",
-#     layout="wide",
-# )
-
-
 st.set_page_config(
-    page_title="Gold Spread Forecasting System", page_icon="📈", layout="wide"
-)
-
-# Hide Sidebar
-st.markdown(
-    """
-<style>
-
-[data-testid="stSidebarNav"]{
-    display:none;
-}
-
-</style>
-""",
-    unsafe_allow_html=True,
-)
-
-page = st.navigation(
-    [
-        st.Page("Home.py", title="Dashboard", icon="🏠"),
-        st.Page("Data_Analysis.py", title="Data Analysis", icon="📊"),
-        st.Page("Model_Results.py", title="Model Results", icon="🤖"),
-        st.Page("Predict.py", title="Prediction", icon="🔮"),
-        st.Page("Batch_Predict.py", title="Batch Prediction", icon="📂"),
-        st.Page("Market_Inteligence.py", title="Market Intelligence", icon="🌍"),
-    ],
-    position="top",
+    page_title="Gold Spread Forecasting System",
+    page_icon="📈",
+    layout="wide",
 )
 
 # =====================================================
