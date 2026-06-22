@@ -2,35 +2,34 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+import plotly.graph_objects as go
 import seaborn as sns
 import matplotlib.pyplot as plt
 
 
 def show_data_analysis():
+    """
+    Data Analysis Module - Exploratory Data Analysis of Gold Price Spread Dataset
+    """
 
     # =====================================================
     # PAGE CONFIG
     # =====================================================
-
     st.set_page_config(page_title="Data Analysis", page_icon="📊", layout="wide")
 
     # =====================================================
-    # CSS
+    # CSS STYLING
     # =====================================================
-
     st.markdown(
         """
     <style>
-
     .main .block-container{
         max-width:1400px;
         padding-top:1rem;
     }
-
     .stApp{
         background-color:#F4F6F9;
     }
-
     [data-testid="stMetric"]{
         background:white;
         border:1px solid #D9DEE5;
@@ -38,12 +37,10 @@ def show_data_analysis():
         padding:15px;
         box-shadow:0px 2px 6px rgba(0,0,0,0.05);
     }
-
     .section-title{
         color:#0D5A9C;
         font-weight:700;
     }
-
     </style>
     """,
         unsafe_allow_html=True,
@@ -52,7 +49,6 @@ def show_data_analysis():
     # =====================================================
     # HEADER
     # =====================================================
-
     st.markdown(
         """
     <div style="
@@ -61,21 +57,10 @@ def show_data_analysis():
     border-radius:10px;
     margin-bottom:20px;
     ">
-
-    <h1 style="
-    margin:0;
-    color:white;
-    ">
-    Data Analysis Center
-    </h1>
-
-    <p style="
-    margin-top:8px;
-    color:#E5E7EB;
-    ">
+    <h1 style="margin:0;color:white;">Data Analysis Center</h1>
+    <p style="margin-top:8px;color:#E5E7EB;">
     Exploratory Data Analysis of Gold Price Spread Dataset
     </p>
-
     </div>
     """,
         unsafe_allow_html=True,
@@ -84,142 +69,274 @@ def show_data_analysis():
     # =====================================================
     # LOAD DATA
     # =====================================================
-
-    df = pd.read_excel("data/dataset.xlsx")
-
-    df["Date"] = pd.to_datetime(df["Date"])
+    try:
+        df = pd.read_csv("data/dataset.csv")
+        print(df.columns.tolist())
+        df["Date"] = pd.to_datetime(df["Date"])
+    except Exception as e:
+        st.error(f"Error loading data: {e}")
+        return
 
     # =====================================================
     # DATASET OVERVIEW
     # =====================================================
-
     st.markdown(
-        "<h3 class='section-title'>Dataset Overview</h3>", unsafe_allow_html=True
+        "<h3 class='section-title'>📈 Dataset Overview</h3>", unsafe_allow_html=True
     )
 
     k1, k2, k3, k4 = st.columns(4)
-
-    k1.metric("Observations", f"{len(df):,}")
-
+    k1.metric("Total Observations", f"{len(df):,}")
     k2.metric("Variables", f"{df.shape[1]-1}")
-
     k3.metric("Start Date", str(df["Date"].min().date()))
-
     k4.metric("End Date", str(df["Date"].max().date()))
+
+    # =====================================================
+    # Data Quality Assessment
+    # =====================================================
+
+    st.markdown(
+        "<h3 class='section-title'>✅ Data Quality Assessment</h3>",
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric("Missing Values", int(df.isna().sum().sum()))
+    c2.metric("Duplicate Rows", int(df.duplicated().sum()))
+    c3.metric("Columns", len(df.columns))
+    c4.metric("Rows", len(df))
+
+
+    # =====================================================
+    #  Distribution Analysis
+    # =====================================================
+    st.markdown(
+        "<h3 class='section-title'>📊 Distribution Analysis</h3>",
+        unsafe_allow_html=True,
+    )
+
+    dist_col = st.selectbox(
+        "Select Variable",
+        [
+            "Spread",
+            "VND/USD",
+            "DXY",
+            "TNX",
+            "Oil_Price",
+            "VNIndex",
+            "SP500",
+            "Bitcoin",
+            "GPR",
+        ],
+    )
+
+    fig_dist = px.histogram(
+        df, x=dist_col, nbins=40, marginal="box", title=f"Distribution of {dist_col}"
+    )
+
+    st.plotly_chart(fig_dist, use_container_width=True)
+
+    # =====================================================
+    # OUTLIER ANA LYSIS
+    # =====================================================
+
+    st.markdown(
+        "<h3 class='section-title'>📦 Outlier Analysis</h3>", unsafe_allow_html=True
+    )
+
+    outlier_col = st.selectbox(
+        "Variable for Outlier Detection",
+        [
+            "Spread",
+            "VND/USD",
+            "DXY",
+            "TNX",
+            "Oil_Price",
+            "VNIndex",
+            "SP500",
+            "Bitcoin",
+            "GPR",
+        ],
+        key="outlier",
+    )
+
+    fig_box = px.box(df, y=outlier_col, title=f"Boxplot of {outlier_col}")
+
+    st.plotly_chart(fig_box, use_container_width=True)
+
+    # =====================================================
+    # SPREAD DISTRIBUTION + PREVIEW
+    # =====================================================
+    left, right = st.columns([1.2, 1])
+
+    with left:
+        st.markdown(
+            "<h3 class='section-title'>Spread Distribution</h3>", unsafe_allow_html=True
+        )
+        fig_hist = px.histogram(
+            df,
+            x="Spread",
+            nbins=40,
+            labels={"Spread": "Spread Value (VND/lượng)"},
+            title="Distribution of Gold Price Spread",
+        )
+        fig_hist.update_layout(height=450, paper_bgcolor="white", plot_bgcolor="white")
+        st.plotly_chart(fig_hist, use_container_width=True)
+
+    with right:
+        st.markdown(
+            "<h3 class='section-title'>Dataset Preview</h3>", unsafe_allow_html=True
+        )
+        st.dataframe(df.tail(15), height=450, use_container_width=True)
 
     st.divider()
 
     # =====================================================
-    # DISTRIBUTION + PREVIEW
+    # TIME SERIES ANALYSIS
     # =====================================================
-
-    left, right = st.columns([1.2, 1])
-
-    with left:
-
-        st.markdown(
-            "<h3 class='section-title'>Spread Distribution</h3>", unsafe_allow_html=True
-        )
-
-        fig_hist = px.histogram(df, x="Spread", nbins=40)
-
-        fig_hist.update_layout(height=450, paper_bgcolor="white", plot_bgcolor="white")
-
-        st.plotly_chart(fig_hist, use_container_width=True)
-
-    with right:
-
-        st.markdown(
-            "<h3 class='section-title'>Dataset Preview</h3>", unsafe_allow_html=True
-        )
-
-        st.dataframe(df.tail(15), height=450, use_container_width=True)
-
-    # =====================================================
-    # TIME SERIES
-    # =====================================================
-
     st.markdown(
-        "<h3 class='section-title'>Spread Time Series</h3>", unsafe_allow_html=True
+        "<h3 class='section-title'>⏱️ Spread Time Series</h3>", unsafe_allow_html=True
     )
 
-    fig_ts = px.line(df, x="Date", y="Spread")
+    fig_ts = px.line(df, x="Date", y="Spread", title="Historical Gold Spread")
 
-    fig_ts.update_traces(line_color="#0D5A9C", line_width=3)
-
-    fig_ts.update_layout(
-        height=550, paper_bgcolor="white", plot_bgcolor="white", hovermode="x unified"
-    )
+    fig_ts.update_traces(line_color="#0D5A9C", line_width=2)
 
     st.plotly_chart(fig_ts, use_container_width=True)
+    # =====================================================
+    # ROLLING MEAN
+    # =====================================================
+    st.markdown(
+        "<h3 class='section-title'>📈 Rolling Mean Analysis</h3>",
+        unsafe_allow_html=True,
+    )
+
+    rolling_df = df.copy()
+
+    rolling_df["MA30"] = rolling_df["Spread"].rolling(30).mean()
+    rolling_df["MA90"] = rolling_df["Spread"].rolling(90).mean()
+
+    fig_ma = go.Figure()
+
+    fig_ma.add_trace(
+        go.Scatter(x=rolling_df["Date"], y=rolling_df["Spread"], name="Spread")
+    )
+
+    fig_ma.add_trace(
+        go.Scatter(x=rolling_df["Date"], y=rolling_df["MA30"], name="MA30")
+    )
+
+    fig_ma.add_trace(
+        go.Scatter(x=rolling_df["Date"], y=rolling_df["MA90"], name="MA90")
+    )
+
+    fig_ma.update_layout(title="Spread with Moving Averages", height=550)
+
+    st.plotly_chart(fig_ma, use_container_width=True)
 
     # =====================================================
     # CORRELATION MATRIX
     # =====================================================
-
     st.markdown(
-        "<h3 class='section-title'>Correlation Matrix</h3>", unsafe_allow_html=True
+        "<h3 class='section-title'>🔗 Correlation Heatmap</h3>", unsafe_allow_html=True
     )
 
-    corr_df = df.copy()
+    corr_df = df.drop(columns=["Date"])
 
-    if "Spread_lag1" not in corr_df.columns:
-        corr_df["Spread_lag1"] = corr_df["Spread"].shift(1)
-
-    corr_df = corr_df.dropna()
-
-    numeric_cols = [
-        "VND/USD",
-        "VNIndex",
-        "Oil_Price",
-        "DXY",
-        "TNX",
-        "GPR",
-        "bitcoin",
-        "Spread_lag1",
-        "Spread",
-    ]
-
-    corr = corr_df[numeric_cols].corr()
+    corr = corr_df.corr(numeric_only=True)
 
     mask = np.triu(np.ones_like(corr, dtype=bool))
 
-    fig, ax = plt.subplots(figsize=(11, 8))
+    fig, ax = plt.subplots(figsize=(12, 9))
 
     sns.heatmap(
         corr,
         mask=mask,
         annot=True,
         fmt=".2f",
+        annot_kws={"size": 8},
         cmap="RdBu_r",
         vmin=-1,
         vmax=1,
-        square=True,
         linewidths=0.5,
-        cbar_kws={"label": "Correlation"},
     )
 
-    plt.title("Correlation Matrix of Variables", fontsize=14, fontweight="bold")
-
-    plt.xticks(rotation=45, ha="right")
-
-    plt.yticks(rotation=0)
-
+    plt.title("Correlation Matrix")
     plt.tight_layout()
 
     st.pyplot(fig)
 
     # =====================================================
-    # DATA QUALITY
+    # BASIC STATISTICS
     # =====================================================
+    st.markdown(
+        "<h3 class='section-title'>📊 Statistical Summary</h3>", unsafe_allow_html=True
+    )
+
+    stats_df = (
+        df[
+            [
+                "VND/USD",
+                "VNIndex",
+                "Oil_Price",
+                "TNX",
+                "GPR",
+                "Bitcoin",
+                "DXY",
+                "Spread",
+            ]
+        ]
+        .describe()
+        .T
+    )
+    st.dataframe(stats_df, use_container_width=True)
+
+    st.divider()
+
+    # CORELATION WITH SPREAD#
 
     st.markdown(
-        "<h3 class='section-title'>Data Quality Summary</h3>", unsafe_allow_html=True
+        "<h3 class='section-title'>🎯 Correlation with Spread</h3>",
+        unsafe_allow_html=True,
+    )
+
+    spread_corr = corr["Spread"].drop("Spread").abs().sort_values(ascending=False)
+
+    corr_rank = pd.DataFrame(
+        {"Variable": spread_corr.index, "Correlation": spread_corr.values}
+    )
+
+    fig_corr = px.bar(
+        corr_rank,
+        x="Variable",
+        y="Correlation",
+        title="Feature Correlation with Spread",
+    )
+
+    st.plotly_chart(fig_corr, use_container_width=True)
+
+    # STATISTICAL SUMMARY#
+    st.markdown(
+        "<h3 class='section-title'>📋 Statistical Summary</h3>", unsafe_allow_html=True
+    )
+
+    st.dataframe(df.describe().T, use_container_width=True)
+
+    # =====================================================
+    # DATA QUALITY ASSESSMENT
+    # =====================================================
+    st.markdown(
+        "<h3 class='section-title'>✅ Data Quality Summary</h3>", unsafe_allow_html=True
     )
 
     quality = pd.DataFrame(
         {
-            "Metric": ["Rows", "Columns", "Missing Values", "Duplicate Rows"],
+            "Metric": [
+                "Total Rows",
+                "Total Columns",
+                "Missing Values",
+                "Duplicate Rows",
+            ],
             "Value": [
                 len(df),
                 len(df.columns),
@@ -228,28 +345,27 @@ def show_data_analysis():
             ],
         }
     )
-
     st.dataframe(quality, use_container_width=True)
+
+    # DATA PREVIEW#
+    st.markdown(
+        "<h3 class='section-title'>🗂️ Dataset Preview</h3>", unsafe_allow_html=True
+    )
+
+    preview_rows = st.slider("Rows to Display", 5, 100, 20)
+
+    st.dataframe(df.tail(preview_rows), use_container_width=True, height=500)
 
     # =====================================================
     # FOOTER
     # =====================================================
-
     st.markdown("---")
-
     st.markdown(
         """
-    <div style="
-    text-align:center;
-    color:#6B7280;
-    font-size:13px;
-    ">
-
-    Gold Spread Forecasting System |
-    Data Analysis Module |
-    Master Thesis Demonstration
-
+    <div style="text-align:center;color:#6B7280;font-size:13px;">
+    Gold Spread Forecasting System | Data Analysis Module | Master Thesis Demonstration
     </div>
     """,
         unsafe_allow_html=True,
     )
+

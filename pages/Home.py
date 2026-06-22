@@ -1,545 +1,269 @@
 import streamlit as st
-import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 
+
+# =====================================================
+# HOME DASHBOARD
+# =====================================================
 def show_home():
+
     # =====================================================
-    # LOAD DATA
+    # STYLE
     # =====================================================
+    st.markdown(
+        """
+    <style>
 
-    df = pd.read_excel("data/dataset.xlsx")
+    .main .block-container{
+        max-width:1400px;
+        padding-top:1rem;
+    }
 
-    df["Date"] = pd.to_datetime(df["Date"])
+    .stApp{
+        background:#F4F6F9;
+    }
 
-    df = df.sort_values("Date")
+    [data-testid="stMetric"]{
+        background:linear-gradient(
+            135deg,
+            #F8FBFF 0%,
+            #EEF6FF 100%
+        );
+        border:1px solid #D7E6F5;
+        border-radius:14px;
+        padding:18px;
+        box-shadow:0 2px 10px rgba(13,90,156,0.08);
+        transition:all 0.3s ease;
+    }
 
-    df_filtered = df.copy()
+    [data-testid="stMetric"]:hover{
+        transform:translateY(-2px);
+        box-shadow:0 4px 12px rgba(13,90,156,0.15);
+    }
 
+    .section-title{
+        color:#0D5A9C;
+        font-weight:700;
+    }
 
-    performance_df = pd.DataFrame(
-        {
-            "Model": [
-                "Linear Regression",
-                "Ridge Regression",
-                "BiLSTM",
-                "LSTM",
-                "GRU",
-                "Decision Tree",
-                "Random Forest",
-                "LightGBM",
-                "XGBoost",
-                "CatBoost",
-            ],
-            "RMSE": [
-                1485999,
-                1485999,
-                1507311,
-                1513489,
-                1869837,
-                2303996,
-                2448672,
-                3040627,
-                3347495,
-                4098987,
-            ],
-            "MAE": [
-                914092,
-                914099,
-                955210,
-                971874,
-                1422955,
-                1287613,
-                1350099,
-                2234146,
-                2519127,
-                2734637,
-            ],
-            "MAPE": [
-                9.66,
-                9.66,
-                10.88,
-                11.39,
-                22.81,
-                11.05,
-                11.08,
-                28.26,
-                32.14,
-                21.69,
-            ],
-            "R2": [0.96, 0.96, 0.96, 0.96, 0.93, 0.90, 0.89, 0.83, 0.79, 0.68],
-        }
+    </style>
+    """,
+        unsafe_allow_html=True,
     )
+
     # =====================================================
     # HEADER
     # =====================================================
+    st.markdown(
+        """
+    <div style="
+    background:#0D5A9C;
+    padding:24px;
+    border-radius:12px;
+    margin-bottom:20px;
+    ">
+    <h1 style="
+    margin:0;
+    color:white;
+    ">
+    🏠 Home Dashboard
+    </h1>
 
-    st.title("📈 Gold Spread Forecasting System")
-
-    st.write(
-        "Forecasting Vietnamese Gold Price Spread Using Statistical, Machine Learning and Deep Learning Models"
+    <p style="
+    margin-top:8px;
+    color:#E5E7EB;
+    ">
+    Vietnamese Gold Spread Forecasting System
+    </p>
+    </div>
+    """,
+        unsafe_allow_html=True,
     )
 
-    st.divider()
+    # =====================================================
+    # SIMULATED DATA
+    # =====================================================
+    np.random.seed(42)
+
+    gold_spread = 15000000 + np.random.normal(0, 200000)
+    vndusd = 26000 + np.random.normal(0, 20)
+    vnindex = 1500 + np.random.normal(0, 10)
+    oil = 70 + np.random.normal(0, 1)
+
+    spread_change = np.random.normal(0, 0.8)
 
     # =====================================================
-    # MODEL SELECTION
+    # KPI CARDS
     # =====================================================
-
-    selected_model = st.selectbox("Select Forecasting Model", performance_df["Model"])
-
-    selected_row = performance_df[performance_df["Model"] == selected_model].iloc[0]
-
-    st.subheader("Model Performance")
+    st.markdown(
+        "<h3 class='section-title'>📊 Market Overview</h3>", unsafe_allow_html=True
+    )
 
     c1, c2, c3, c4 = st.columns(4)
 
-    with c1:
-        st.metric(
-            "RMSE",
-            f"{selected_row['RMSE']:,.0f}"
-        )
+    c1.metric("Gold Spread", f"{gold_spread:,.0f}", f"{spread_change:+.2f}%")
 
-    with c2:
-        st.metric(
-            "MAE",
-            f"{selected_row['MAE']:,.0f}"
-        )
+    c2.metric("USD/VND", f"{vndusd:,.0f}", "+0.10%")
 
-    with c3:
-        st.metric(
-            "MAPE",
-            f"{selected_row['MAPE']:.2f}%"
-        )
+    c3.metric("VN-Index", f"{vnindex:,.0f}", "-0.20%")
 
-    with c4:
-        st.metric(
-            "R²",
-            f"{selected_row['R2']:.2f}"
-        )
-    st.subheader("Model Description")
-
-    if selected_model in [
-        "Linear Regression",
-        "Ridge Regression"
-    ]:
-
-        st.info(
-            """
-Category: Statistical Model
-
-Scaler: StandardScaler
-
-Characteristics:
-
-• Fast training
-
-• Easy interpretation
-
-• Suitable for deployment
-"""
-        )
-
-    elif selected_model in [
-        "Decision Tree",
-        "Random Forest"
-    ]:
-
-        st.info(
-            """
-Category: Machine Learning
-
-Scaler: StandardScaler
-
-Characteristics:
-
-• Nonlinear learning
-
-• Feature interaction
-
-• Strong generalization
-"""
-        )
-
-    elif selected_model in [
-        "XGBoost",
-        "LightGBM",
-        "CatBoost"
-    ]:
-
-        st.info(
-            """
-Category: Boosting Model
-
-Scaler: None
-
-Characteristics:
-
-• Ensemble learning
-
-• Strong predictive power
-
-• Handles complex relationships
-"""
-        )
-
-    else:
-
-        st.info(
-            """
-Category: Deep Learning
-
-Scaler: MinMaxScaler
-
-Characteristics:
-
-• Sequential learning
-
-• Time-series forecasting
-
-• Captures nonlinear dynamics
-"""
-        )
-    # =====================================================
-    # MODEL PERFORMANCE
-    # =====================================================
-
-    c1, c2, c3, c4 = st.columns(4)
-
-    c1.metric("RMSE", f"{selected_row['RMSE']:,.0f}")
-
-    c2.metric("MAE", f"{selected_row['MAE']:,.0f}")
-
-    c3.metric("MAPE", f"{selected_row['MAPE']:.2f}%")
-
-    c4.metric("R²", f"{selected_row['R2']:.2f}")
+    c4.metric("Oil Price (USD)", f"{oil:,.2f}", "+0.50%")
 
     st.divider()
+
     # =====================================================
-    # RADAR CHART - MODEL COMPARISON
+    # TREND CHART
     # =====================================================
-
-    import numpy as np
-    import plotly.graph_objects as go
-
-    metrics_cols = ["RMSE", "MAE", "MAPE", "R2"]
-
-    # chuẩn hóa (min-max để vẽ radar)
-    compare_df = performance_df.copy()
-
-    best_model = performance_df.sort_values("RMSE").iloc[0]
-
-    for col in metrics_cols:
-        compare_df[col] = (
-            (compare_df[col] - compare_df[col].min())
-            / (compare_df[col].max() - compare_df[col].min())
-        )
-
-    selected_vals = compare_df[
-        compare_df["Model"] == selected_model
-    ][metrics_cols].values.flatten()
-
-    best_vals = compare_df[
-        compare_df["Model"] == best_model["Model"]
-    ][metrics_cols].values.flatten()
-
-    fig_radar = go.Figure()
-
-    fig_radar.add_trace(go.Scatterpolar(
-        r=selected_vals,
-        theta=metrics_cols,
-        fill='toself',
-        name='Selected Model',
-        line=dict(color="#E53935", width=3)
-    ))
-
-    fig_radar.add_trace(go.Scatterpolar(
-        r=best_vals,
-        theta=metrics_cols,
-        fill='toself',
-        name='Best Model',
-        line=dict(color="#0D5A9C", width=3)
-    ))
-
-    fig_radar.update_layout(
-        polar=dict(
-            radialaxis=dict(
-                visible=True,
-                range=[0, 1]
-            )
-        ),
-        height=500,
-        showlegend=True,
-        paper_bgcolor="white"
+    st.markdown(
+        "<h3 class='section-title'>📈 Gold Spread Trend</h3>", unsafe_allow_html=True
     )
 
-    st.plotly_chart(fig_radar, use_container_width=True)
+    days = 60
+    base = 15000000
 
-    # =====================================================
-    # MODEL INSIGHT
-    # =====================================================
+    noise = np.random.normal(0, 15000, days)
 
-    st.markdown("### 📌 Model Insight")
+    trend = base + np.cumsum(noise)
 
-    if selected_model == best_model["Model"]:
-        st.success(
-            "Model này đang là mô hình tốt nhất theo RMSE. " "Phù hợp để deploy production."
-        )
-    else:
-        gap = selected_row["RMSE"] - best_model["RMSE"]
-
-        st.warning(f"""
-    Model này chưa phải tốt nhất.
-
-    Chênh lệch RMSE với best model: {gap:,.0f}
-
-    → Có thể cân nhắc dùng ensemble hoặc tuning hyperparameter.
-    """)
-
-    # =====================================================
-    # SCALING INFO
-    # =====================================================
-
-    st.markdown("### ⚙️ Preprocessing Method")
-
-    if selected_model in ["Linear Regression", "Ridge Regression"]:
-        st.info("StandardScaler được áp dụng cho dữ liệu đầu vào")
-
-    elif selected_model in ["LSTM", "GRU", "BiLSTM"]:
-        st.info("MinMaxScaler (0-1 normalization) được sử dụng cho chuỗi thời gian")
-
-    elif selected_model in ["XGBoost", "LightGBM", "CatBoost"]:
-        st.info("Không cần scaling - tree-based models")
-
-    else:
-        st.info("StandardScaler được sử dụng mặc định")
-        # =====================================================
-    # DATASET INFORMATION
-    # =====================================================
-
-    d1, d2, d3 = st.columns(3)
-
-    d1.metric("Observations", f"{len(df):,}")
-
-    d2.metric("Variables", len(df.columns) - 1)
-
-    d3.metric("Period", f"{df['Date'].dt.year.min()} - {df['Date'].dt.year.max()}")
-
-    st.divider()
-
-    # best_model = performance_df.sort_values(
-    #     "RMSE"
-    # ).iloc[0]
-
-    st.success(
-        f"""
-    🏆 Best Performing Model
-
-    Model: {best_model['Model']}
-
-    RMSE: {best_model['RMSE']:,.0f}
-
-    MAE: {best_model['MAE']:,.0f}
-
-    MAPE: {best_model['MAPE']:.2f}%
-
-    R²: {best_model['R2']:.2f}
-    """
-        )
-    # =====================================================
-    # RMSE COMPARISON
-    # =====================================================
-
-    st.subheader("Model RMSE Comparison")
-    colors = [
-        "#E53935" if m == selected_model else "#0D5A9C" for m in performance_df["Model"]
-    ]
-    fig_rmse = go.Figure()
-
-    fig_rmse.add_bar(
-        x=performance_df["Model"],
-        y=performance_df["RMSE"],
-        marker_color=colors,
-        text=[
-            f"{v:,.0f}"
-            for v in performance_df["RMSE"]
-        ]
-    )
-
-    fig_rmse.update_traces(
-        textposition="outside"
-    )
-
-    fig_rmse.update_layout(
-        height=550,
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        xaxis_title="Model",
-        yaxis_title="RMSE",
-        showlegend=False
-    )
-
-    st.plotly_chart(
-        fig_rmse,
-        use_container_width=True
-    )
-
-    # =====================================================
-    # MODEL RANKING
-    # =====================================================
-
-    st.subheader("Model Ranking")
-    ranking_df = performance_df.sort_values(
-    "RMSE"
-    ).reset_index(drop=True)
-
-    ranking_df.index += 1
-
-    ranking_df.index.name = "Rank"
-    st.dataframe(ranking_df, use_container_width=True, height=450)
-
-    # =====================================================
-    # RECENT DATA
-    # =====================================================
-
-    st.subheader("Recent Dataset Records")
-
-    st.dataframe(
-        df.tail(20),
-        use_container_width=True,
-        height=350
-    )
-
-    latest_date = df["Date"].max()
-    time_option = st.selectbox("Select Time Range", ["7D", "1M", "3M", "6M", "All"])
-    
-    if time_option == "7D":
-        df_filtered = df[df["Date"] >= latest_date - pd.Timedelta(days=7)]
-    elif time_option == "1M":
-        df_filtered = df[df["Date"] >= latest_date - pd.Timedelta(days=30)]
-    elif time_option == "3M":
-        df_filtered = df[df["Date"] >= latest_date - pd.Timedelta(days=90)]
-    elif time_option == "6M":
-        df_filtered = df[df["Date"] >= latest_date - pd.Timedelta(days=180)]
-    else:
-        df_filtered = df.copy()
-
-    # ====================================================
-    # =====================================================
-    # SPREAD TREND
-    # =====================================================
     fig = go.Figure()
 
     fig.add_trace(
         go.Scatter(
-            x=df_filtered["Date"],
-            y=df_filtered["Spread"],
+            y=trend,
             mode="lines",
-            name="Spread",
-            line=dict(color="#0D5A9C", width=3)
+            name="Gold Spread",
+            line=dict(color="#0D5A9C", width=4),
         )
     )
 
     fig.update_layout(
-        title=f"Historical Gold Spread Trend ({time_option})",
-        height=600,
+        title="Gold Spread Trend Simulation",
+        height=500,
         paper_bgcolor="white",
-        plot_bgcolor="white"
+        plot_bgcolor="white",
+        hovermode="x unified",
+        xaxis_title="Time",
+        yaxis_title="Spread (VND/lượng)",
+        margin=dict(l=20, r=20, t=50, b=20),
     )
 
     st.plotly_chart(fig, use_container_width=True)
 
-    st.markdown("### 📊 Market Snapshot")
+    st.divider()
 
-    k1, k2, k3, k4 = st.columns(4)
-
-    k1.metric(
-        "Current Spread",
-        f"{df_filtered['Spread'].iloc[-1]:,.0f}",
-        delta=None
-    )
-
-    k2.metric(
-        "Average Spread",
-        f"{df_filtered['Spread'].mean():,.0f}"
-    )
-
-    k3.metric(
-        "Max Spread",
-        f"{df_filtered['Spread'].max():,.0f}"
-    )
-
-    k4.metric(
-        "Records",
-        f"{len(df_filtered):,}"
-    )
+    # =====================================================
+    # SIGNAL GAUGE
+    # =====================================================
     st.markdown(
-    f"""
+        "<h3 class='section-title'>🎯 Market Signal Strength</h3>",
+        unsafe_allow_html=True,
+    )
+
+    signal_score = np.random.randint(40, 90)
+
+    gauge = go.Figure(
+        go.Indicator(
+            mode="gauge+number",
+            value=signal_score,
+            title={"text": "Signal Score"},
+            gauge={
+                "axis": {"range": [0, 100]},
+                "bar": {"color": "#0D5A9C"},
+                "steps": [
+                    {"range": [0, 40], "color": "#FFEBEE"},
+                    {"range": [40, 70], "color": "#FFF3E0"},
+                    {"range": [70, 100], "color": "#E8F5E9"},
+                ],
+            },
+        )
+    )
+
+    gauge.update_layout(height=350)
+
+    st.plotly_chart(gauge, use_container_width=True)
+
+    st.divider()
+
+    # =====================================================
+    # INSIGHTS
+    # =====================================================
+    st.markdown(
+        "<h3 class='section-title'>🧠 Market Insights</h3>", unsafe_allow_html=True
+    )
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+
+        st.success("""
+### Positive Factors
+
+✅ Gold spread remains stable
+
+✅ FX market under control
+
+✅ No abnormal market movement
+
+✅ Forecast reliability remains high
+""")
+
+    with col2:
+
+        st.warning("""
+### Risk Factors
+
+⚠️ USD fluctuations
+
+⚠️ Global geopolitical tensions
+
+⚠️ Oil market volatility
+
+⚠️ Inflation uncertainty
+""")
+
+    st.divider()
+
+    # =====================================================
+    # SIGNAL
+    # =====================================================
+    signal = np.random.choice(["BUY", "HOLD", "SELL"], p=[0.3, 0.5, 0.2])
+
+    st.markdown(
+        "<h3 class='section-title'>📌 Market Recommendation</h3>",
+        unsafe_allow_html=True,
+    )
+
+    if signal == "BUY":
+
+        st.success("🟢 BUY SIGNAL — Market conditions support accumulation.")
+
+    elif signal == "SELL":
+
+        st.error("🔴 SELL SIGNAL — Risk level increasing, caution advised.")
+
+    else:
+
+        st.info("🟡 HOLD SIGNAL — Neutral market conditions.")
+
+    # =====================================================
+    # FOOTER
+    # =====================================================
+    st.markdown("---")
+
+    st.markdown(
+        """
     <div style="
-        background-color:#0D5A9C;
-        padding:10px;
-        border-radius:10px;
-        color:white;
-        font-weight:bold;
-        text-align:center;
+    text-align:center;
+    color:#6B7280;
+    font-size:13px;
     ">
-        Period: {df_filtered['Date'].min().date()} → {df_filtered['Date'].max().date()}
+
+    Gold Spread Forecasting System<br>
+
+    Master Thesis Demonstration Dashboard
+
     </div>
     """,
-    unsafe_allow_html=True
-)
-    # =====================================================
-    # RMSE COMPARISON
-    # =====================================================
-
-    rmse_sorted = performance_df.sort_values("RMSE")
-
-    colors = [
-        "#E53935"
-        if m == selected_model
-        else "#0D5A9C"
-        for m in rmse_sorted["Model"]
-    ]
-
-    fig_rmse = go.Figure()
-
-    fig_rmse.add_bar(
-    x=rmse_sorted["Model"],
-    y=rmse_sorted["RMSE"],
-    marker_color=colors,
-    text=[
-        f"{v:,.0f}"
-        for v in rmse_sorted["RMSE"]
-    ],
-    textposition="outside"
-)
-
-    fig_rmse.update_layout(title="RMSE Comparison Across Models", height=500)
-
-    st.plotly_chart(fig_rmse, use_container_width=True)
-
-    # =====================================================
-    # RANKING
-    # =====================================================
-
-    st.subheader("Model Ranking")
-
-    ranking_df = performance_df.sort_values(
-    "RMSE"
-    ).reset_index(drop=True)
-
-    ranking_df.index += 1
-
-    ranking_df.index.name = "Rank"
-
-    st.dataframe(ranking_df, use_container_width=True)
-
-    # =====================================================
-    # RECENT DATA
-    # =====================================================
-
-    st.subheader("Recent Dataset")
-
-    st.dataframe(df.tail(20), use_container_width=True)
-
-
-show_home()
+        unsafe_allow_html=True,
+    )
