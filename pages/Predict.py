@@ -91,7 +91,7 @@ def show_prediction_center():
     )
 
     st.markdown(
-            """
+        """
     <style>
 
     /* Selectbox */
@@ -127,8 +127,8 @@ def show_prediction_center():
 
     </style>
     """,
-            unsafe_allow_html=True,
-        )
+        unsafe_allow_html=True,
+    )
 
     # =====================================================
     # HEADER
@@ -158,7 +158,10 @@ def show_prediction_center():
 
         if model_name in ML_MODELS:
 
-            return {"type": "ml", "model": joblib.load(f"models/{ML_MODELS[model_name]}")}
+            return {
+                "type": "ml",
+                "model": joblib.load(f"models/{ML_MODELS[model_name]}"),
+            }
 
         cfg = DL_MODELS[model_name]
 
@@ -188,20 +191,11 @@ def show_prediction_center():
 
         X_scaled = feature_scaler.transform(X)
 
-        X_scaled = X_scaled.reshape(
-            X_scaled.shape[0],
-            1,
-            X_scaled.shape[1]
-        )
+        X_scaled = X_scaled.reshape(X_scaled.shape[0], 1, X_scaled.shape[1])
 
-        pred_scaled = model_info["model"].predict(
-            X_scaled,
-            verbose=0
-        )
+        pred_scaled = model_info["model"].predict(X_scaled, verbose=0)
 
-        pred = target_scaler.inverse_transform(
-            pred_scaled
-        )
+        pred = target_scaler.inverse_transform(pred_scaled)
 
         return float(pred[0][0])
 
@@ -211,10 +205,7 @@ def show_prediction_center():
 
     st.markdown("### 🤖 Select Forecasting Model")
 
-    selected_model = st.selectbox(
-        "Choose Model",
-        ALL_MODELS
-    )
+    selected_model = st.selectbox("Choose Model", ALL_MODELS)
 
     model_info = load_model_by_name(selected_model)
 
@@ -224,16 +215,9 @@ def show_prediction_center():
 
     df = pd.read_csv("data/dataset.csv")
 
-    df["Date"] = pd.to_datetime(
-        df["Date"],
-        dayfirst=True,
-        errors="coerce"
-    )
+    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, errors="coerce")
 
-    df["Spread"] = pd.to_numeric(
-        df["Spread"],
-        errors="coerce"
-    )
+    df["Spread"] = pd.to_numeric(df["Spread"], errors="coerce")
 
     FEATURES = [
         "VND/USD",
@@ -306,8 +290,7 @@ def show_prediction_center():
             # CALCULATIONS
             # =====================================================
             diff = pred - spread_lag1
-            pct_change = (
-                diff / spread_lag1) * 100
+            pct_change = (diff / spread_lag1) * 100
 
             # Signal determination
             if pct_change > 5:
@@ -581,7 +564,7 @@ def show_prediction_center():
                     columns=FEATURES,
                 )
 
-                pred = predict_spread(model_info,X)
+                pred = predict_spread(model_info, X)
 
                 # Calculate metrics
                 change = pred - current_spread
@@ -677,11 +660,7 @@ def show_prediction_center():
                     y=forecast_y,
                     mode="lines+markers",
                     name="Forecasted Spread",
-                    line=dict(
-                        color="#E53935",
-                        width=3,
-                        dash="dash"
-                    ),
+                    line=dict(color="#E53935", width=3, dash="dash"),
                     marker=dict(size=6),
                 )
             )
@@ -807,9 +786,7 @@ def show_prediction_center():
             else:
 
                 if st.button(
-                    "🚀 Run Batch Forecast",
-                    use_container_width=True,
-                    type="primary"
+                    "🚀 Run Batch Forecast", use_container_width=True, type="primary"
                 ):
 
                     all_results = []
@@ -823,29 +800,26 @@ def show_prediction_center():
                         for day in range(1, forecast_days + 1):
 
                             X = pd.DataFrame(
-                                [[
-                                    row["VND/USD"],
-                                    row["VNIndex"],
-                                    row["Oil_Price"],
-                                    row["DXY"],
-                                    row["TNX"],
-                                    row["GPR"],
-                                    row["Bitcoin"],
-                                    current_spread
-                                ]],
-                                columns=FEATURES
+                                [
+                                    [
+                                        row["VND/USD"],
+                                        row["VNIndex"],
+                                        row["Oil_Price"],
+                                        row["DXY"],
+                                        row["TNX"],
+                                        row["GPR"],
+                                        row["Bitcoin"],
+                                        current_spread,
+                                    ]
+                                ],
+                                columns=FEATURES,
                             )
 
-                            pred = predict_spread(
-                                model_info,
-                                X
-                            )
+                            pred = predict_spread(model_info, X)
 
-                            all_results.append({
-                                "Record": idx + 1,
-                                "Day": day,
-                                "Forecast": pred
-                            })
+                            all_results.append(
+                                {"Record": idx + 1, "Day": day, "Forecast": pred}
+                            )
 
                             current_spread = pred
 
@@ -857,51 +831,39 @@ def show_prediction_center():
                         y="Forecast",
                         color="Record",
                         markers=True,
-                        title="Batch Multi-Day Forecast"
+                        title="Batch Multi-Day Forecast",
                     )
 
-                    st.plotly_chart(
-                        fig,
-                        use_container_width=True
-                    )
+                    st.plotly_chart(fig, use_container_width=True)
 
-                    st.dataframe(
-                        result_df,
-                        use_container_width=True
-                    )
+                    st.dataframe(result_df, use_container_width=True)
 
                     k1, k2, k3, k4 = st.columns(4)
-                    k1.metric(
-                        "Min Forecast", f"{df_upload['Predicted_Spread'].min():,.0f}"
-                    )
-                    k2.metric(
-                        "Avg Forecast", f"{df_upload['Predicted_Spread'].mean():,.0f}"
-                    )
-                    k3.metric(
-                        "Max Forecast", f"{df_upload['Predicted_Spread'].max():,.0f}"
-                    )
-                    k4.metric("Total Records", len(df_upload))
+                    k1.metric("Min Forecast", f"{result_df['Forecast'].min():,.0f}")
+                    k2.metric("Avg Forecast", f"{result_df['Forecast'].mean():,.0f}")
+                    k3.metric("Max Forecast", f"{result_df['Forecast'].max():,.0f}")
+                    k4.metric("Total Records", len(result_df))
 
                     st.divider()
 
                     # Distribution chart
                     fig = px.histogram(
-                        df_upload,
-                        x="Predicted_Spread",
+                        result_df,
+                        x="Forecast",
                         nbins=30,
                         title="Distribution of Batch Forecasts",
-                        labels={"Predicted_Spread": "Predicted Spread"},
+                        labels={"Forecast": "Predicted Spread"},
                     )
                     st.plotly_chart(fig, use_container_width=True)
 
                     # Results table
                     st.markdown("### Batch Forecast Results")
-                    st.dataframe(df_upload, use_container_width=True, height=500)
+                    st.dataframe(result_df, use_container_width=True, height=500)
 
                     # Download results
                     st.download_button(
                         "📥 Download Results (CSV)",
-                        df_upload.to_csv(index=False),
+                        result_df.to_csv(index=False),
                         file_name="batch_prediction_results.csv",
                         mime="text/csv",
                         use_container_width=True,
