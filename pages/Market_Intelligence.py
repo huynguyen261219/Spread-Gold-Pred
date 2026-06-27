@@ -45,29 +45,28 @@ def show_market_intelligence():
     )
 
     st.markdown(
-            """
-    <style>
+        """
+<style>
 
-    .main .block-container{
-        max-width:1400px;
-        padding-top:1rem;
-    }
+.main .block-container{
+    max-width:1400px;
+    padding-top:1rem;
+}
 
-    .stApp{
-        background-color:#F4F6F9;
-    }
+.stApp{
+    background-color:#F4F6F9;
+}
 
-    div[data-baseweb="select"] > div{
-        border:3px solid #0D5A9C !important;
-        border-radius:16px !important;
-        box-shadow:0 4px 12px rgba(13,90,156,0.25) !important;
-        min-height:55px !important;
-    }
+div[data-baseweb="select"] > div{
+    border:3px solid #0D5A9C !important;
+    border-radius:16px !important;
+    box-shadow:0 4px 12px rgba(13,90,156,0.25) !important;
+}
 
-    </style>
-    """,
-            unsafe_allow_html=True,
-        )
+</style>
+""",
+        unsafe_allow_html=True,
+    )
 
     # =====================================================
     # HEADER
@@ -112,44 +111,36 @@ def show_market_intelligence():
 
     period = st.selectbox(
         "Select Time Range",
-        [
-            "All Data",
-            "1 Year",
-            "6 Months",
-            "3 Months",
-            "1 Month"
-        ]
+        ("All Data","1 Year","6 Months","3 Months","1 Month"),
+        placeholder="Select Time Range...",
     )
 
     df_view = df.copy()
 
     if period == "1 Year":
 
-        df_view = df[
-            df["Date"] >=
-            df["Date"].max() - pd.DateOffset(years=1)
-        ]
+        df_view = df[df["Date"] >= df["Date"].max() - pd.DateOffset(years=1)]
 
     elif period == "6 Months":
 
         df_view = df[
             df["Date"] >=
             df["Date"].max() - pd.DateOffset(months=6)
-        ]
+            ]
 
     elif period == "3 Months":
 
         df_view = df[
             df["Date"] >=
             df["Date"].max() - pd.DateOffset(months=3)
-        ]
+            ]
 
     elif period == "1 Month":
 
         df_view = df[
             df["Date"] >=
             df["Date"].max() - pd.DateOffset(months=1)
-        ]
+            ]
 
     # =====================================================
     # KPI
@@ -172,14 +163,15 @@ def show_market_intelligence():
         unsafe_allow_html=True
     )
 
-    c1,c2,c3,c4,c5,c6 = st.columns(6)
+    c1, c2, c3 = st.columns([1, 1, 1])
+    c4, c5, c6 = st.columns([1, 1, 1])
 
     previous_spread = df_view["Spread"].iloc[-2]
 
     delta_pct = (
-        (latest_spread - previous_spread)
-        / previous_spread
-        * 100
+            (latest_spread - previous_spread)
+            / previous_spread
+            * 100
     )
 
     c1.metric(
@@ -354,62 +346,62 @@ def show_market_intelligence():
     # MOVING AVERAGE
     # =====================================================
 
-    df_view["MA7"] = df_view["Spread"].rolling(7).mean()
+    # df_view["MA7"] = df_view["Spread"].rolling(7).mean()
+    #
+    # df_view["MA30"] = df_view["Spread"].rolling(30).mean()
+    #
+    # df_view["MA90"] = df_view["Spread"].rolling(90).mean()
+    #
+    # st.markdown(
+    #     "<h3 class='section-title'>📊 Moving Average Analysis</h3>",
+    #     unsafe_allow_html=True
+    # )
+    #
+    # fig_ma = go.Figure()
+    #
+    # fig_ma.add_trace(
+    #     go.Scatter(
+    #         x=df_view["Date"],
+    #         y=df_view["Spread"],
+    #         name="Spread"
+    #     )
+    # )
+    #
+    # fig_ma.add_trace(
+    #     go.Scatter(
+    #         x=df_view["Date"],
+    #         y=df_view["MA7"],
+    #         name="MA7"
+    #     )
+    # )
+    #
+    # fig_ma.add_trace(
+    #     go.Scatter(
+    #         x=df_view["Date"],
+    #         y=df_view["MA30"],
+    #         name="MA30"
+    #     )
+    # )
+    #
+    # fig_ma.add_trace(
+    #     go.Scatter(
+    #         x=df_view["Date"],
+    #         y=df_view["MA90"],
+    #         name="MA90"
+    #     )
+    # )
+    #
+    # fig_ma.update_layout(
+    #     height=550,
+    #     hovermode="x unified"
+    # )
+    #
+    # st.plotly_chart(
+    #     fig_ma,
+    #     use_container_width=True
+    # )
 
-    df_view["MA30"] = df_view["Spread"].rolling(30).mean()
-
-    df_view["MA90"] = df_view["Spread"].rolling(90).mean()
-
-    st.markdown(
-        "<h3 class='section-title'>📊 Moving Average Analysis</h3>",
-        unsafe_allow_html=True
-    )
-
-    fig_ma = go.Figure()
-
-    fig_ma.add_trace(
-        go.Scatter(
-            x=df_view["Date"],
-            y=df_view["Spread"],
-            name="Spread"
-        )
-    )
-
-    fig_ma.add_trace(
-        go.Scatter(
-            x=df_view["Date"],
-            y=df_view["MA7"],
-            name="MA7"
-        )
-    )
-
-    fig_ma.add_trace(
-        go.Scatter(
-            x=df_view["Date"],
-            y=df_view["MA30"],
-            name="MA30"
-        )
-    )
-
-    fig_ma.add_trace(
-        go.Scatter(
-            x=df_view["Date"],
-            y=df_view["MA90"],
-            name="MA90"
-        )
-    )
-
-    fig_ma.update_layout(
-        height=550,
-        hovermode="x unified"
-    )
-
-    st.plotly_chart(
-        fig_ma,
-        use_container_width=True
-    )
-
-    st.divider()
+    # st.divider()
 
     # =====================================================
     # VOLATILITY
@@ -478,7 +470,7 @@ def show_market_intelligence():
         .reset_index()
     )
 
-    regime.columns = ["Regime","Count"]
+    regime.columns = ["Regime", "Count"]
 
     fig_regime = px.pie(
         regime,
@@ -526,7 +518,7 @@ def show_market_intelligence():
         unsafe_allow_html=True
     )
 
-    c1,c2 = st.columns(2)
+    c1, c2 = st.columns(2)
 
     with c1:
 
@@ -536,7 +528,7 @@ def show_market_intelligence():
             df_view.nlargest(
                 10,
                 "Spread"
-            )[["Date","Spread"]],
+            )[["Date", "Spread"]],
             use_container_width=True
         )
 
@@ -548,7 +540,7 @@ def show_market_intelligence():
             df_view.nsmallest(
                 10,
                 "Spread"
-            )[["Date","Spread"]],
+            )[["Date", "Spread"]],
             use_container_width=True
         )
 

@@ -108,6 +108,13 @@ def show_model_results():
         # BEST MODEL
         # =====================================================
 
+        # Kết quả đánh giá các mô hình
+        st.dataframe(
+            all_models,
+            use_container_width=True,
+            hide_index=True
+        )
+
         best_model = all_models.sort_values("R2", ascending=False).iloc[0]
 
         st.success(f"""
@@ -333,7 +340,7 @@ def show_model_results():
             name="Actual",
             line=dict(
                 color="#0D5A9C",
-                width=3
+                width=2,
             )
         )
     )
@@ -367,7 +374,7 @@ def show_model_results():
             y=test["Predicted"] - error_band,
             fill="tonexty",
             fillcolor="rgba(229,57,53,0.15)",
-            line=dict(width=0),
+            line=dict(width=1, backoff=0.15),
             name="RMSE Band"
         )
     )
@@ -452,7 +459,7 @@ def show_model_results():
         y="Feature",
         orientation="h",
         color="Coefficient",
-        title="Feature Coefficient Contribution"
+        title="Feature Coefficients"
     )
 
     fig4.update_layout(
@@ -620,39 +627,44 @@ def show_model_results():
 
     st.divider()
 
-    # =====================================================
-    # MODEL STABILITY
-    # =====================================================
+    # # =====================================================
+    # # MODEL STABILITY
+    # # =====================================================
+    #
+    # rolling_rmse = (
+    #     (
+    #         (test["Actual"] - test["Predicted"]) ** 2
+    #     )
+    #     .rolling(50)
+    #     .mean()
+    #     ** 0.5
+    # )
+    #
+    # st.markdown(
+    #     "<h3 class='section-title'>📈 Model Stability Analysis</h3>",
+    #     unsafe_allow_html=True,
+    # )
+    #
+    # fig_stability = px.line(
+    #     rolling_rmse,
+    #     title="Rolling RMSE (Window = 50)",
+    #     labels={
+    #         "index": "Date",
+    #         "value": "Rolling RMSE (VND/lượng)"
+    #     }
+    # )
+    #
+    # fig_stability.update_layout(
+    #     showlegend=False,
+    #     height=500
+    # )
+    #
+    # st.plotly_chart(
+    #     fig_stability,
+    #     use_container_width=True
+    # )
 
-    rolling_rmse = (
-        (
-            (test["Actual"] - test["Predicted"]) ** 2
-        )
-        .rolling(50)
-        .mean()
-        ** 0.5
-    )
-
-    st.markdown(
-        "<h3 class='section-title'>📈 Model Stability Analysis</h3>",
-        unsafe_allow_html=True,
-    )
-
-    fig_stability = px.line(
-        rolling_rmse,
-        title="Rolling RMSE (Window = 50)"
-    )
-
-    fig_stability.update_layout(
-        height=500
-    )
-
-    st.plotly_chart(
-        fig_stability,
-        use_container_width=True
-    )
-
-    st.divider()
+    # st.divider()
 
     # =====================================================
     # RESIDUAL STATISTICS
@@ -789,7 +801,7 @@ def show_model_results():
     """
         )
 
-    st.divider()
+    # st.divider()
 
     # =====================================================
     # FOOTER

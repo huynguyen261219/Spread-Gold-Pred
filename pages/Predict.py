@@ -99,12 +99,6 @@ def show_prediction_center():
         border: 3px solid #0D5A9C !important;
         border-radius: 16px !important;
         background-color: #F8FAFC !important;
-
-        box-shadow:
-            0 0 0 3px rgba(13,90,156,0.10),
-            0 4px 12px rgba(13,90,156,0.25) !important;
-
-        min-height: 60px !important;
     }
 
     /* Hover */
@@ -215,7 +209,7 @@ def show_prediction_center():
 
     df = pd.read_csv("data/dataset.csv")
 
-    df["Date"] = pd.to_datetime(df["Date"], dayfirst=True, errors="coerce")
+    df["Date"] = pd.to_datetime(df["Date"])
 
     df["Spread"] = pd.to_numeric(df["Spread"], errors="coerce")
 
@@ -406,15 +400,16 @@ def show_prediction_center():
                 unsafe_allow_html=True,
             )
 
-            left_col, right_col = st.columns(2)
+            state_col, = st.columns(1)
+            range_analysis_col, = st.columns(1)
 
-            with left_col:
+            with state_col:
                 c1, c2, c3 = st.columns(3)
                 c1.metric("Signal", signal)
                 c2.metric("Confidence", confidence)
                 c3.metric("Model", selected_model)
 
-            with right_col:
+            with range_analysis_col:
                 st.markdown(f"""
                 **Forecast Range Analysis:**
                 - 🔵 Lower Bound (±3%): {lower:,.0f}

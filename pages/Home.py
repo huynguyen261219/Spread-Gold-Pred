@@ -112,45 +112,45 @@ def show_home():
 
     st.divider()
 
-    # =====================================================
-    # TREND CHART
-    # =====================================================
-    st.markdown(
-        "<h3 class='section-title'>📈 Gold Spread Trend</h3>", unsafe_allow_html=True
-    )
-
-    days = 60
-    base = 15000000
-
-    noise = np.random.normal(0, 15000, days)
-
-    trend = base + np.cumsum(noise)
-
-    fig = go.Figure()
-
-    fig.add_trace(
-        go.Scatter(
-            y=trend,
-            mode="lines",
-            name="Gold Spread",
-            line=dict(color="#0D5A9C", width=4),
-        )
-    )
-
-    fig.update_layout(
-        title="Gold Spread Trend Simulation",
-        height=500,
-        paper_bgcolor="white",
-        plot_bgcolor="white",
-        hovermode="x unified",
-        xaxis_title="Time",
-        yaxis_title="Spread (VND/lượng)",
-        margin=dict(l=20, r=20, t=50, b=20),
-    )
-
-    st.plotly_chart(fig, use_container_width=True)
-
-    st.divider()
+    # # =====================================================
+    # # TREND CHART
+    # # =====================================================
+    # st.markdown(
+    #     "<h3 class='section-title'>📈 Gold Spread Trend</h3>", unsafe_allow_html=True
+    # )
+    #
+    # days = 60
+    # base = 15000000
+    #
+    # noise = np.random.normal(0, 15000, days)
+    #
+    # trend = base + np.cumsum(noise)
+    #
+    # fig = go.Figure()
+    #
+    # fig.add_trace(
+    #     go.Scatter(
+    #         y=trend,
+    #         mode="lines",
+    #         name="Gold Spread",
+    #         line=dict(color="#0D5A9C", width=4),
+    #     )
+    # )
+    #
+    # fig.update_layout(
+    #     title="Gold Spread Trend Simulation",
+    #     height=500,
+    #     paper_bgcolor="white",
+    #     plot_bgcolor="white",
+    #     hovermode="x unified",
+    #     xaxis_title="Time",
+    #     yaxis_title="Spread (VND/lượng)",
+    #     margin=dict(l=20, r=20, t=50, b=20),
+    # )
+    #
+    # st.plotly_chart(fig, use_container_width=True)
+    #
+    # st.divider()
 
     # =====================================================
     # SIGNAL GAUGE

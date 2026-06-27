@@ -86,7 +86,7 @@ def show_data_analysis():
 
     k1, k2, k3, k4 = st.columns(4)
     k1.metric("Total Observations", f"{len(df):,}")
-    k2.metric("Variables", f"{df.shape[1]-1}")
+    k2.metric("Variables", f"{df.shape[1] - 1}")
     k3.metric("Start Date", str(df["Date"].min().date()))
     k4.metric("End Date", str(df["Date"].max().date()))
 
@@ -105,7 +105,6 @@ def show_data_analysis():
     c2.metric("Duplicate Rows", int(df.duplicated().sum()))
     c3.metric("Columns", len(df.columns))
     c4.metric("Rows", len(df))
-
 
     # =====================================================
     #  Distribution Analysis
@@ -131,13 +130,13 @@ def show_data_analysis():
     )
 
     fig_dist = px.histogram(
-        df, x=dist_col, nbins=40, marginal="box", title=f"Distribution of {dist_col}"
+        df, x=dist_col, nbins=40, title=f"Distribution of {dist_col}"
     )
 
     st.plotly_chart(fig_dist, use_container_width=True)
 
     # =====================================================
-    # OUTLIER ANA LYSIS
+    # OUTLIER ANALYSIS
     # =====================================================
 
     st.markdown(
@@ -164,45 +163,8 @@ def show_data_analysis():
 
     st.plotly_chart(fig_box, use_container_width=True)
 
-    # =====================================================
-    # SPREAD DISTRIBUTION + PREVIEW
-    # =====================================================
-    left, right = st.columns([1.2, 1])
-
-    with left:
-        st.markdown(
-            "<h3 class='section-title'>Spread Distribution</h3>", unsafe_allow_html=True
-        )
-        fig_hist = px.histogram(
-            df,
-            x="Spread",
-            nbins=40,
-            labels={"Spread": "Spread Value (VND/lượng)"},
-            title="Distribution of Gold Price Spread",
-        )
-        fig_hist.update_layout(height=450, paper_bgcolor="white", plot_bgcolor="white")
-        st.plotly_chart(fig_hist, use_container_width=True)
-
-    with right:
-        st.markdown(
-            "<h3 class='section-title'>Dataset Preview</h3>", unsafe_allow_html=True
-        )
-        st.dataframe(df.tail(15), height=450, use_container_width=True)
-
     st.divider()
 
-    # =====================================================
-    # TIME SERIES ANALYSIS
-    # =====================================================
-    st.markdown(
-        "<h3 class='section-title'>⏱️ Spread Time Series</h3>", unsafe_allow_html=True
-    )
-
-    fig_ts = px.line(df, x="Date", y="Spread", title="Historical Gold Spread")
-
-    fig_ts.update_traces(line_color="#0D5A9C", line_width=2)
-
-    st.plotly_chart(fig_ts, use_container_width=True)
     # =====================================================
     # ROLLING MEAN
     # =====================================================
@@ -213,21 +175,46 @@ def show_data_analysis():
 
     rolling_df = df.copy()
 
+    rolling_df["MA7"] = rolling_df["Spread"].rolling(7).mean()
     rolling_df["MA30"] = rolling_df["Spread"].rolling(30).mean()
     rolling_df["MA90"] = rolling_df["Spread"].rolling(90).mean()
 
     fig_ma = go.Figure()
 
     fig_ma.add_trace(
-        go.Scatter(x=rolling_df["Date"], y=rolling_df["Spread"], name="Spread")
+        go.Scatter(
+            x=rolling_df["Date"],
+            y=rolling_df["Spread"],
+            name="Spread",
+            line=dict(color="#1F77B4")
+        )
     )
 
     fig_ma.add_trace(
-        go.Scatter(x=rolling_df["Date"], y=rolling_df["MA30"], name="MA30")
+        go.Scatter(
+            x=rolling_df["Date"],
+            y=rolling_df["MA7"],
+            name="MA7",
+            line=dict(color="#FF7F0E")
+        )
     )
 
     fig_ma.add_trace(
-        go.Scatter(x=rolling_df["Date"], y=rolling_df["MA90"], name="MA90")
+        go.Scatter(
+            x=rolling_df["Date"],
+            y=rolling_df["MA30"],
+            name="MA30",
+            line=dict(color="#2CA02C")
+        )
+    )
+
+    fig_ma.add_trace(
+        go.Scatter(
+            x=rolling_df["Date"],
+            y=rolling_df["MA90"],
+            name="MA90",
+            line=dict(color="#D62728")
+        )
     )
 
     fig_ma.update_layout(title="Spread with Moving Averages", height=550)
@@ -308,19 +295,13 @@ def show_data_analysis():
 
     fig_corr = px.bar(
         corr_rank,
-        x="Variable",
-        y="Correlation",
+        y="Variable",
+        x="Correlation",
         title="Feature Correlation with Spread",
+        orientation="h"
     )
 
     st.plotly_chart(fig_corr, use_container_width=True)
-
-    # STATISTICAL SUMMARY#
-    st.markdown(
-        "<h3 class='section-title'>📋 Statistical Summary</h3>", unsafe_allow_html=True
-    )
-
-    st.dataframe(df.describe().T, use_container_width=True)
 
     # =====================================================
     # DATA QUALITY ASSESSMENT
@@ -354,7 +335,11 @@ def show_data_analysis():
 
     preview_rows = st.slider("Rows to Display", 5, 100, 20)
 
-    st.dataframe(df.tail(preview_rows), use_container_width=True, height=500)
+    df_preview = df.copy()
+    df_preview["Date"] = df_preview["Date"].dt.strftime("%Y-%m-%d")
+
+    st.dataframe(df_preview.tail(preview_rows), hide_index=True,
+                 use_container_width=True)
 
     # =====================================================
     # FOOTER
@@ -368,4 +353,3 @@ def show_data_analysis():
     """,
         unsafe_allow_html=True,
     )
-
