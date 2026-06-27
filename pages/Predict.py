@@ -571,7 +571,6 @@ def show_prediction_center():
 
                 forecast_results.append(
                     {
-                        "Day": day,
                         "Date": (current_date + pd.Timedelta(days=day)).strftime(
                             "%Y-%m-%d"
                         ),
