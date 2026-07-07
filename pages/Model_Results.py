@@ -810,7 +810,7 @@ def show_model_results():
     st.markdown(
         """
     <div style="text-align:center;color:#6B7280;font-size:13px;">
-    Gold Spread Forecasting System | Model Results Module | Master Thesis Demonstration
+    Gold Spread Forecasting System | Model Results Module
     </div>
     """,
         unsafe_allow_html=True,

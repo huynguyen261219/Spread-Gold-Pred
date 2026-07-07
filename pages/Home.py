@@ -167,6 +167,7 @@ def show_home():
             mode="gauge+number",
             value=signal_score,
             title={"text": "Signal Score"},
+            number={"suffix": " %", "font": {"size": 60}},
             gauge={
                 "axis": {"range": [0, 100]},
                 "bar": {"color": "#0D5A9C"},
@@ -260,8 +261,6 @@ def show_home():
     ">
 
     Gold Spread Forecasting System<br>
-
-    Master Thesis Demonstration Dashboard
 
     </div>
     """,

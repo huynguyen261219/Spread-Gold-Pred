@@ -348,7 +348,7 @@ def show_data_analysis():
     st.markdown(
         """
     <div style="text-align:center;color:#6B7280;font-size:13px;">
-    Gold Spread Forecasting System | Data Analysis Module | Master Thesis Demonstration
+    Gold Spread Forecasting System | Data Analysis Module
     </div>
     """,
         unsafe_allow_html=True,
