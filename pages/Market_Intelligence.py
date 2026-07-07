@@ -223,10 +223,8 @@ div[data-baseweb="select"] > div{
             x=df_view["Date"],
             y=df_view["SJC"],
             name="Domestic Gold (SJC)",
-            line=dict(
-                color="#0D5A9C",
-                width=3
-            )
+            line=dict(color="#0D5A9C", width=3),
+            yaxis="y",
         )
     )
 
@@ -235,10 +233,8 @@ div[data-baseweb="select"] > div{
             x=df_view["Date"],
             y=df_view["Gold-global(VND)"],
             name="World Gold (Converted)",
-            line=dict(
-                color="#E53935",
-                width=3
-            )
+            line=dict(color="#E53935", width=3),
+            yaxis="y",
         )
     )
     fig_gold.add_trace(
@@ -246,8 +242,8 @@ div[data-baseweb="select"] > div{
             x=df_view["Date"],
             y=df_view["Spread"],
             name="Spread",
-            yaxis="y2",
             line=dict(color="#2E7D32", width=3),
+            yaxis="y2",
         )
     )
 
@@ -255,7 +251,30 @@ div[data-baseweb="select"] > div{
         height=550,
         paper_bgcolor="white",
         plot_bgcolor="white",
-        hovermode="x unified"
+        hovermode="x unified",
+        legend=dict(orientation="h", y=1.05, x=1, xanchor="right"),
+        margin=dict(l=70, r=70, t=60, b=40),
+        # Left Y-axis
+        yaxis=dict(
+            title=dict(
+                text="Gold Price (Million VND/lượng)", font=dict(color="#0D5A9C")
+            ),
+            tickfont=dict(color="#0D5A9C"),
+            tickformat="~s",
+            gridcolor="#E5E5E5",
+            zeroline=False,
+        ),
+        # Right Y-axis
+        yaxis2=dict(
+            title=dict(text="Spread (Million VND/lượng)", font=dict(color="#2E7D32")),
+            tickfont=dict(color="#2E7D32"),
+            overlaying="y",
+            side="right",
+            tickformat="~s",
+            showgrid=False,
+            zeroline=False,
+        ),
+        xaxis=dict(showgrid=False, showline=True, linecolor="lightgray"),
     )
 
     fig_gold.update_layout(yaxis2=dict(overlaying="y", side="right"))

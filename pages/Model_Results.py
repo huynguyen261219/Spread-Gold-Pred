@@ -292,8 +292,8 @@ def show_model_results():
 
     metric_df = pd.DataFrame(
         {
-            "Metric": ["RMSE", "MAE", "MAPE"],
-            "Value": [rmse, mae, mape],
+            "Metric": ["RMSE", "MAE"],
+            "Value": [rmse, mae],
         }
     )
 
@@ -359,14 +359,6 @@ def show_model_results():
         )
     )
 
-    fig1.add_trace(
-        go.Scatter(
-            x=test.index,
-            y=test["Predicted"] + error_band,
-            line=dict(width=0),
-            showlegend=False
-        )
-    )
 
     fig1.add_trace(
         go.Scatter(
