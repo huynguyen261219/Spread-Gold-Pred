@@ -6,7 +6,7 @@ A Streamlit-based web application for predicting gold prices using trained machi
 
 The application is available on Streamlit Community Cloud:
 
-**https://your-app-name.streamlit.app**
+**[https://your-app-name.streamlit.app](https://spread-gold-pred-c3fugqpuua9pwrrrbn2spp.streamlit.app/)**
 
 > Replace the URL above with your deployed Streamlit application.
 
