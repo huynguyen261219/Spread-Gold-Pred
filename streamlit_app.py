@@ -1,3 +1,6 @@
+import os
+os.environ["TF_ENABLE_ONEDNN_OPTS"] = "0"
+
 import streamlit as st
 from pages import (
     show_home,

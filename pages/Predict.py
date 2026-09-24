@@ -9,16 +9,44 @@ import plotly.graph_objects as go
 
 from tensorflow.keras.models import load_model
 
+from pages.recommendation import generate_recommendations
+
+custom_css = """
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-family: sans-serif;
+    }
+    th {
+        background-color: #f0f2f6;
+        color: #31333F;
+        font-weight: bold;
+        padding: 12px;
+        border: 1px solid #e6e6e6;
+        text-align: center !important; /* 🎯 Căn giữa toàn bộ tiêu đề */
+    }
+    td {
+        padding: 12px;
+        border: 1px solid #e6e6e6;
+        vertical-align: top;
+        text-align: left !important;    /* Nội dung văn bản bên dưới vẫn căn lề trái */
+        line-height: 1.6;
+    }
+    tr:nth-child(even) { background-color: #f9f9f9; }
+</style>
+"""
+
+
 # ==========================
 # MACHINE LEARNING MODELS
 # ==========================
 
 ML_MODELS = {
     "Linear Regression": "linear_pipeline.pkl",
-    "Ridge Regression": "ridge_pipeline.pkl",
     "Decision Tree": "decision_tree.pkl",
     "Random Forest": "random_forest.pkl",
-    "XGBoost": "xgboost (1).pkl",
+    "XGBoost": "xgboost.pkl",
     "LightGBM": "lightgbm.pkl",
     "CatBoost": "catboost.pkl",
 }
@@ -41,8 +69,23 @@ DL_MODELS = {
     },
 }
 
+# Mô hình lai (weighted ensemble) theo mục 4.1.3 của đồ án:
+# Dự báo = w1*LinearRegression + w2*XGBoost (+ w3*LightGBM)
+ENSEMBLE_MODELS = {
+    "Linear Regression + XGBoost": {
+        "components": ["Linear Regression", "XGBoost"],
+        "weights": [0.5, 0.5],
+    },
+    "Linear Regression + XGBoost + LightGBM": {
+        "components": ["Linear Regression", "XGBoost", "LightGBM"],
+        "weights": [0.5, 0.3, 0.2],
+    },
+}
 
-ALL_MODELS = list(ML_MODELS.keys()) + list(DL_MODELS.keys())
+
+ALL_MODELS = (
+    list(ML_MODELS.keys()) + list(DL_MODELS.keys()) + list(ENSEMBLE_MODELS.keys())
+)
 
 
 def show_prediction_center():
@@ -148,7 +191,7 @@ def show_prediction_center():
     # LOAD MODEL & DATA
     # =====================================================
 
-    def load_model_by_name(model_name):
+    def load_single_model(model_name):
 
         if model_name in ML_MODELS:
 
@@ -166,11 +209,27 @@ def show_prediction_center():
             "target_scaler": joblib.load(f"models/{cfg['target_scaler']}"),
         }
 
+    def load_model_by_name(model_name):
+
+        if model_name in ENSEMBLE_MODELS:
+
+            cfg = ENSEMBLE_MODELS[model_name]
+
+            return {
+                "type": "ensemble",
+                "weights": cfg["weights"],
+                "components": [
+                    load_single_model(name) for name in cfg["components"]
+                ],
+            }
+
+        return load_single_model(model_name)
+
     # =====================================================
     # COMMON PREDICTION FUNCTION
     # =====================================================
 
-    def predict_spread(model_info, X):
+    def predict_single(model_info, X):
 
         # Machine Learning Models
         if model_info["type"] == "ml":
@@ -192,6 +251,21 @@ def show_prediction_center():
         pred = target_scaler.inverse_transform(pred_scaled)
 
         return float(pred[0][0])
+
+    def predict_spread(model_info, X):
+
+        # Mô hình lai (weighted ensemble), theo công thức mục 4.1.3 của đồ án
+        if model_info["type"] == "ensemble":
+
+            component_preds = [
+                predict_single(comp, X) for comp in model_info["components"]
+            ]
+
+            return float(
+                sum(w * p for w, p in zip(model_info["weights"], component_preds))
+            )
+
+        return predict_single(model_info, X)
 
     # =====================================================
     # MODEL SELECTION
@@ -219,7 +293,6 @@ def show_prediction_center():
         "Oil_Price",
         "DXY",
         "TNX",
-        "GPR",
         "Bitcoin",
         "Spread_lag1",
     ]
@@ -259,7 +332,6 @@ def show_prediction_center():
 
         with c2:
             tnx = st.number_input("TNX (10Y Treasury)", value=4.0, step=0.1)
-            gpr = st.number_input("GPR (Geopolitical Risk)", value=150.0, step=5.0)
             Bitcoin = st.number_input(
                 "Bitcoin Price (USD)", value=100000.0, step=1000.0
             )
@@ -274,7 +346,7 @@ def show_prediction_center():
         if predict_btn:
 
             X = pd.DataFrame(
-                [[vndusd, vnindex, oil, dxy, tnx, gpr, Bitcoin, spread_lag1]],
+                [[vndusd, vnindex, oil, dxy, tnx, Bitcoin, spread_lag1]],
                 columns=FEATURES,
             )
 
@@ -500,7 +572,7 @@ def show_prediction_center():
         )
 
         # Forecast horizon selection
-        forecast_days = st.slider("Select Forecast Horizon", 1, 30, 7, step=1)
+        forecast_days = st.slider("Select Forecast Horizon", 1, 14, 7, step=1)
 
         st.markdown(
             "<b>Input Current Values (Used for forecasting)</b>", unsafe_allow_html=True
@@ -523,9 +595,6 @@ def show_prediction_center():
         with c2:
             tnx = st.number_input(
                 "TNX (10Y Treasury)", value=4.0, step=0.1, key="md_tnx"
-            )
-            gpr = st.number_input(
-                "GPR (Geopolitical Risk)", value=150.0, step=5.0, key="md_gpr"
             )
             Bitcoin = st.number_input(
                 "Bitcoin Price (USD)", value=100000.0, step=1000.0, key="md_Bitcoin"
@@ -555,7 +624,7 @@ def show_prediction_center():
             # Generate multi-day forecast
             for day in range(1, forecast_days + 1):
                 X = pd.DataFrame(
-                    [[vndusd, vnindex, oil, dxy, tnx, gpr, Bitcoin, current_spread]],
+                    [[vndusd, vnindex, oil, dxy, tnx, Bitcoin, current_spread]],
                     columns=FEATURES,
                 )
 
@@ -608,6 +677,55 @@ def show_prediction_center():
             display_df["CI Upper"] = display_df["CI Upper"].apply(lambda x: f"{x:,.0f}")
 
             st.dataframe(display_df, use_container_width=True)
+
+            st.divider()
+
+            # =====================================================
+            # NHẬN ĐỊNH & KHUYẾN NGHỊ CÂN NHẮC GIAO DỊCH (mục 3.8)
+            # =====================================================
+            st.markdown(
+                "<h3 class='section-title'>🧭 Nhận định & Khuyến nghị cân nhắc giao dịch</h3>",
+                unsafe_allow_html=True,
+            )
+
+            historical_spread = df["Spread"].dropna()
+
+            recommendation_rows = generate_recommendations(
+                forecast_df["Forecast"].tolist(), historical_spread
+            )
+
+            recommendation_df = pd.DataFrame(recommendation_rows)
+
+            recommendation_df_html = recommendation_df[["Ngày dự báo", "Spread dự báo (VND/lượng)", "Nhận định"]].to_html(escape=False, index=False)
+
+            st.write(custom_css + recommendation_df_html, unsafe_allow_html=True)
+
+            # st.dataframe(
+            #     recommendation_df[
+            #         [
+            #             "Ngày dự báo",
+            #             "Spread dự báo (VND/lượng)",
+            #             "Nhận định",
+            #         ]
+            #     ],
+            #     use_container_width=True,
+            #     height=min(400, 45 * (len(recommendation_df) + 1)),
+            # )
+
+            with st.expander("📖 Xem nội dung khuyến nghị chi tiết theo từng ngày"):
+                for row in recommendation_rows:
+                    st.markdown(
+                        f"**{row['Ngày dự báo']}** "
+                        f"(Spread dự báo: {row['Spread dự báo (VND/lượng)']} VND/lượng): "
+                        f"{row['Khuyến nghị cân nhắc giao dịch']}"
+                    )
+
+            st.caption(
+                "⚠️ Các nhận định trên chỉ mang tính chất tham khảo, tổng hợp từ dấu của "
+                "Spread, vị trí của Spread so với tứ phân vị lịch sử và mức độ biến động "
+                "(Rolling Volatility 30 ngày). Đây không phải là khuyến nghị mua hoặc bán "
+                "vàng và không thay thế quyết định của người dùng."
+            )
 
             st.divider()
 
@@ -801,7 +919,6 @@ def show_prediction_center():
                                         row["Oil_Price"],
                                         row["DXY"],
                                         row["TNX"],
-                                        row["GPR"],
                                         row["Bitcoin"],
                                         current_spread,
                                     ]
