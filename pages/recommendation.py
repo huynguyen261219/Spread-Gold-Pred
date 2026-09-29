@@ -68,7 +68,7 @@ def generate_recommendations(
 ):
     """
     forecast_values: list/array các giá trị Spread dự báo, theo thứ tự thời gian
-        (t+1, t+2, ..., t+N).
+        (t, t+1, t+2, ..., t+N).
     historical_spread: pd.Series giá trị Spread thực tế trong quá khứ, đã sắp
         xếp theo thời gian tăng dần (không chứa NaN).
 

@@ -197,7 +197,7 @@ def show_home():
 
     with col1:
 
-        st.success("""
+        st.markdown("""
 ### Positive Factors
 
 ✅ Gold spread remains stable
@@ -211,7 +211,7 @@ def show_home():
 
     with col2:
 
-        st.warning("""
+        st.markdown("""
 ### Risk Factors
 
 ⚠️ USD fluctuations
