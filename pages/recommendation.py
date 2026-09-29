@@ -95,7 +95,7 @@ def generate_recommendations(
     rolling_buffer = list(hist.tail(max(window - 1, 0)))
 
     results = []
-    for day_idx, value in enumerate(forecast_values, start=1):
+    for day_idx, value in enumerate(forecast_values, start=0):
         rolling_buffer.append(value)
         window_vals = rolling_buffer[-window:]
 
@@ -113,7 +113,7 @@ def generate_recommendations(
 
         results.append(
             {
-                "Ngày dự báo": f"t+{day_idx}",
+                "Ngày dự báo": f"t+{day_idx}" if day_idx > 0 else "t",
                 "Spread dự báo (VND/lượng)": f"{value:,.0f}",
                 "Nhận định": "<br>".join(bullet_lines),
                 "Rolling Volatility": rv_t,

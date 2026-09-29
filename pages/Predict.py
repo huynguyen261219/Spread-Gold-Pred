@@ -716,7 +716,7 @@ def show_prediction_center():
                 for row in recommendation_rows:
                     st.markdown(
                         f"**{row['Ngày dự báo']}** "
-                        f"(Spread dự báo: {row['Spread dự báo (VND/lượng)']:,.0f} VND/lượng): "
+                        f"(Spread dự báo: {row['Spread dự báo (VND/lượng)']} VND/lượng): "
                         f"{row['Khuyến nghị cân nhắc giao dịch']}"
                     )
 
