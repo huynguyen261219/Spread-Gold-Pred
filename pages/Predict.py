@@ -336,7 +336,7 @@ def show_prediction_center():
                 "Bitcoin Price (USD)", value=100000.0, step=1000.0
             )
             spread_lag1 = st.number_input(
-                "Last Observed Spread (t)", value=15000000.0, step=100000.0
+                "Spread (t-1)", value=15000000.0, step=100000.0
             )
 
         predict_btn = st.button(
@@ -602,7 +602,7 @@ def show_prediction_center():
             latest_spread = float(df["Spread"].iloc[-1])
 
         spread_current = st.number_input(
-            "Current Spread (Today)",
+            "Spread (t-1)",
             value=latest_spread,
             step=100000.0,
             key="md_spread",
