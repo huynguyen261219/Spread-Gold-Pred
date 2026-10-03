@@ -126,7 +126,7 @@ def show_model_results():
 
     RMSE: {best_model['RMSE']:,.0f}
 
-    MAPE: {best_model['MAPE_percent']:.2f}%
+    MAPE: {best_model["MAPE (%)"]:.2f}%
     """)
 
         selected_model = st.selectbox(
@@ -154,7 +154,7 @@ def show_model_results():
 
         c2.metric("MAE", f"{model_info['MAE']:,.0f}")
 
-        c3.metric("MAPE", f"{model_info['MAPE_percent']:.2f}%")
+        c3.metric("MAPE", f"{model_info["MAPE (%)"]:.2f}%")
 
         c4.metric("R² Score", f"{model_info['R2']:.4f}")
 
