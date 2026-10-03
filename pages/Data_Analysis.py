@@ -124,8 +124,7 @@ def show_data_analysis():
             "Oil_Price",
             "VNIndex",
             "SP500",
-            "Bitcoin",
-            "GPR",
+            "Bitcoin"
         ],
     )
 
@@ -153,8 +152,7 @@ def show_data_analysis():
             "Oil_Price",
             "VNIndex",
             "SP500",
-            "Bitcoin",
-            "GPR",
+            "Bitcoin"
         ],
         key="outlier",
     )
@@ -267,7 +265,6 @@ def show_data_analysis():
                 "VNIndex",
                 "Oil_Price",
                 "TNX",
-                "GPR",
                 "Bitcoin",
                 "DXY",
                 "Spread",
