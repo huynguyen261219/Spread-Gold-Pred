@@ -1,4 +1,4 @@
-Model,RMSE,MAE,MAPE_percent,R2
+Model,RMSE,MAE,MAPE (%),R2
 Linear Regression,1586877,1009415,10.25383,0.953627
 Linear Regression + XGBoost,2315469,1713392,18.63578,0.901268
 Linear Regression + XGBoost + LightGBM,2339883,1775876,20.73009,0.899175
